@@ -1,0 +1,8 @@
+<div class="custom-control custom-checkbox">
+    {{each countries}}
+    <input type="checkbox" class="custom-control-input" id="countrySelected" value="${this.country/${this.province}}">
+    <label class="custom-control-label" for="defaultUnchecked">
+        ${this.country} {{if this.province}} - ${this.province}{{/if}}
+    </label>
+    {{/each}}
+</div>
