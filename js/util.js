@@ -1,10 +1,10 @@
 ///////// CONFIG /////////
 
 //URL
-const countriesJsonURL      = "/data/countries.json";
-//const countryHistoryURL     = "/data/${country}.json";
+const countriesJsonURL      = "../data/countries.json";
+//const countryHistoryURL     = "../data/${country}.json";
 const countryHistoryURL     = "https://corona.lmao.ninja/v2/historical/${country}";
-const countriesTemplateURL = '/templates/countriesTemplate.html';
+const countriesTemplateURL = '../templates/countriesTemplate.html';
 
 //classes and IDs
 const checkboxClass         = ".selectedCountries";
