@@ -4,4 +4,4 @@ Este código foi desenvolvido com base nos dados fornecidos por pela API [NovelC
 
 Visualização desenvolvida utilizando a biblioteca [D3JS](https://d3js.org)
 
-(Visualize o resultado aqui)[view.html]
+[Visualize o resultado aqui](view.html)
