@@ -21,14 +21,24 @@
                 <div id="countries"></div>
             </div>
             <div class="col-sm-10">
-                <button onclick="updateGraph()">Update Graph</button>
+                <div class="row">
+                    <div class="col-sm">
+                        <button onclick="updateGraph()">Update Graph</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div id="graph"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-    
 
 
-    
+
+
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -82,26 +92,15 @@
             }]
         };
 
-        readData(function(data) {
+        readData(function (data) {
             makeCountriesSelection(data);
         });
 
-        function updateGraph() {
-            var selectedCountry = [];
-
-            const selected = $(".selectedCountries:checked");
-            if (selected.length > 0) {
-                selected.each(function() {
-                    selectedCountry.push($(this).val());
-                });
-                showCountriesHistory(selectedCountry);
-            } else {
-                console.log("nenhum selecionado");
-            }
-        }
-
+        initializeD3();
         
 
+
+        
     </script>
 </body>
 
