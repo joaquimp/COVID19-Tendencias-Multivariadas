@@ -1,5 +1,5 @@
-{{each countries}}
+{{each(i) countries}}
 <div class="checkbox">
-    <label><input type="checkbox" class="selectedCountries" value="${this.country}"> ${this.country}</label>
+    <label><input type="checkbox" class="selectedCountries" value="${this.country}" {{if i == 0}}checked{{/if}}> ${this.country}</label>
 </div>
 {{/each}}

@@ -2,7 +2,8 @@
 
 //URL
 const countriesJsonURL      = "/data/countries.json";
-const countryHistoryURL     = "/data/${country}.json";
+//const countryHistoryURL     = "/data/${country}.json";
+const countryHistoryURL     = "https://corona.lmao.ninja/v2/historical/${country}";
 const countriesTemplateURL = '/templates/countriesTemplate.html';
 
 //classes and IDs
@@ -44,19 +45,6 @@ function getCountriesHistory(countries) {
     return data;
 }
 
-// D3JS - Criando os graficos com os dados
-
-function initializeD3() {
-    // append the svg object to the body of the page
-    d3.select(graphID)
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-}
-
 function processData(data) {
     if (data == null || data.length == 0) {
         showMessage("Problema com os dados");
@@ -79,31 +67,10 @@ function processData(data) {
     return newData;
 }
 
-function showCountriesHistory(countries) {
-    var data = getCountriesHistory(countries);
-    data = processData(data);
-
-    // TODO - Verificar se os dados estao presente e fazer tratamento
+function showCountriesHistory(data) {
 
     registryLog("showCountriesHistory", countries);
     registryLog("showCountriesHistory - DATA", data);
-
-    // // Calula o valor maximo de y
-    // var maxY = data.reduce(function(maxValue, country) {
-    //     const aux = Object.entries(country.timeline.cases);
-    //     const maxLocal = aux[aux.length-1][1];
-    //     return maxValue > maxLocal ? maxValue : maxLocal;
-    // },0);
-
-    // // Calcula o dominio de X
-    // const dates = d3.keys(data[0].timeline.cases).map(function(stringDate) {
-    //     return new Date(stringDate);
-    // });
-    // const xDomain = [dates[0],dates[dates.length-1]];
-
-    // registryLog("showCountriesHistory:maxY", maxY);
-
-    var svg = d3.select(graphID);
 
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
@@ -134,7 +101,6 @@ function showCountriesHistory(countries) {
         .domain(countriesName)
         .range(['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999'])
 
-    
     // Draw cases line
     svg.selectAll(".line")
         .data(groupedData)
@@ -149,13 +115,11 @@ function showCountriesHistory(countries) {
                 .y(function (d) { return y(d.cases); })  
                 (d.values)              
         })
-    
 }
 
 
 // Verifica quais os países selecionados e 
-// atualiza os dados do grafico
-function updateGraph() {
+function getSelectedCountries() {
     var selectedCountries = [];
 
     const selected = $(`${checkboxClass}:checked`);
@@ -163,16 +127,81 @@ function updateGraph() {
         selected.each(function () {
             selectedCountries.push($(this).val());
         });
-        showCountriesHistory(selectedCountries);
+        return selectedCountries;
     } else {
         showMessage(messageNotFound);
     }
+    return null;
+}
+
+// atualiza os dados do grafico
+function updateGraph() {
+    const countries = getSelectedCountries();
+    if (countries == null) return;
+
+    var data = getCountriesHistory(countries);
+    data = processData(data);
+
+    registryLog("showCountriesHistory", countries);
+    registryLog("showCountriesHistory - DATA", data);
+
+    var x = d3.scaleLinear()
+        .domain(d3.extent(data, function (d) { return d.date; }))
+        .range([0, width]);
+
+    var y = d3.scaleLinear()
+        .domain([0, d3.max(data, function (d) { return d.cases; })])
+        .range([height, 0]);
+
+    // Select the section we want to apply our changes to
+    svg.transition();
+
+    const groupedData = d3.nest() // nest function allows to group the calculation per level of a factor
+        .key(function (d) { return d.country; })
+        .entries(data);
+
+    // color palette
+    var countriesName = groupedData.map(function (d) { return d.key }) // list of group names
+    var casesColor = d3.scaleOrdinal()
+        .domain(countriesName)
+        .range(['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999'])
+
+    svg.selectAll(".line")
+        .data(groupedData)
+        .exit()
+        .remove()
+    // Draw cases line
+    svg.selectAll(".line")
+        .data(groupedData)
+        .enter()
+        .append("path")
+        .attr("fill", "none")
+        .attr("stroke", function (d) { return casesColor(d.key) })
+        .attr("stroke-width", 1.5)
+        .attr("d", function (d) {
+            return d3.line()
+                .x(function (d) { return x(d.date); })
+                .y(function (d) { return y(d.cases); })
+                (d.values)
+        })
+    
+}
+
+
+function initGraph() {
+    const countries = getSelectedCountries();
+    if (countries == null) return;
+
+    var data = getCountriesHistory(countries);
+    data = processData(data);
+    showCountriesHistory(data);
 }
 
 // HTML Generation
 function makeCountriesSelection(data) {
     $.get(countriesTemplateURL, function(template) {
         $.tmpl(template, data).appendTo(countriesList);
+        initGraph();
     })
 }
 
